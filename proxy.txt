@@ -1,0 +1,20 @@
+Step - 1: 
+Creating a resource group. Change the locations if need
+
+az group create --name myProxyGroup --location eastus
+
+Step -2:
+Create the resource
+
+
+az container create --resource-group myProxyGroup  --name mySquidProxy  --image ubuntu/squid  --ports 3128  --ip-address Public  --dns-name-label myproxy-$RANDOM  --os-type Linux  --cpu 1  --memory 1.5
+
+Step - 3:
+Verify the deployment
+
+az container show --resource-group myProxyGroup --name mySquidProxy --query "\{IP:ipAddress.ip, Status:instanceView.state\}" --output table
+
+Maintenance - 
+
+Start or stop using
+az container start --resource-group myProxyGroup --name my-squid-proxy
