@@ -7,7 +7,14 @@ Step -2:
 Create the resource
 
 
-az container create --resource-group myProxyGroup  --name mySquidProxy  --image ubuntu/squid  --ports 3128  --ip-address Public  --dns-name-label myproxy-$RANDOM  --os-type Linux  --cpu 1  --memory 1.5
+az container create \
+--resource-group myProxyGroup\
+--name mySquidProxy \ 
+--image ubuntu/squid  --ports 3128 \
+--ip-address Public \ 
+--dns-name-label myproxy-$RANDOM \ 
+--os-type Linux \
+--cpu 1 --memory 1.5
 
 Step - 3:
 Verify the deployment
@@ -32,83 +39,123 @@ az group create --name proxy-rg-canada --location canadacentral
 
 
 # Deploy proxies in East US
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-eastus \
     --name squid-proxy-eastus-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
+    --restart-policy Always \
     --dns-name-label squid-eastus-$i \
     --no-wait
 done
 
 # Deploy proxies in West US
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-westus \
     --name squid-proxy-westus-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
+    --restart-policy Always \
     --dns-name-label squid-westus-$i \
     --no-wait
 done
 
 # Deploy proxies in UK South
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-uksouth \
     --name squid-proxy-uksouth-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
+    --restart-policy Always \
     --dns-name-label squid-uksouth-$i \
     --no-wait
 done
 
 # Deploy proxies in Central India
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-india \
     --name squid-proxy-india-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
+    --restart-policy Always \
     --dns-name-label squid-india-$i \
     --no-wait
 done
 
 # Deploy proxies in Australia East
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-australia \
     --name squid-proxy-australia-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
     --dns-name-label squid-australia-$i \
+    --restart-policy Always \
     --no-wait
 done
 
 # Deploy proxies in Canada Central
-for i in {1..10}
+for i in {1..20}
 do
   az container create \
     --resource-group proxy-rg-canada \
     --name squid-proxy-canada-$i \
-    --image mcr.microsoft.com/squid-proxy:latest \
-    --cpu 1 --memory 1.5 \
+    --image ubuntu/squid \
+    --cpu 1 --memory 1.5 --os-type Linux \
     --ports 3128 \
     --dns-name-label squid-canada-$i \
+    --restart-policy Always \
     --no-wait
 done
 
 #dns name will look something like this
 
 squid-eastus-1.eastus.azurecontainer.io:3128, squid-eastus-2.eastus.azurecontainer.io:3128
+
+#start
+for i in {1..20}
+do
+  az container start --resource-group proxy-rg-eastus --name squid-proxy-eastus-$i
+  az container start --resource-group proxy-rg-westus --name squid-proxy-westus-$i
+  az container start --resource-group proxy-rg-uksouth --name squid-proxy-uksouth-$i
+  az container start --resource-group proxy-rg-india --name squid-proxy-india-$i
+  az container start --resource-group proxy-rg-australia --name squid-proxy-australia-$i
+  az container start --resource-group proxy-rg-canada --name squid-proxy-canada-$i
+done
+
+#stop
+for i in {1..20}
+do
+  az container stop --resource-group proxy-rg-eastus --name squid-proxy-eastus-$i
+  az container stop --resource-group proxy-rg-westus --name squid-proxy-westus-$i
+  az container stop --resource-group proxy-rg-uksouth --name squid-proxy-uksouth-$i
+  az container stop --resource-group proxy-rg-india --name squid-proxy-india-$i
+  az container stop --resource-group proxy-rg-australia --name squid-proxy-australia-$i
+  az container stop --resource-group proxy-rg-canada --name squid-proxy-canada-$i
+done
+
+#show
+for i in {1..20}
+do
+  az container show --resource-group proxy-rg-eastus --name squid-proxy-eastus-$i
+  az container show --resource-group proxy-rg-westus --name squid-proxy-westus-$i
+  az container show --resource-group proxy-rg-uksouth --name squid-proxy-uksouth-$i
+  az container show --resource-group proxy-rg-india --name squid-proxy-india-$i
+  az container show --resource-group proxy-rg-australia --name squid-proxy-australia-$i
+  az container show --resource-group proxy-rg-canada --name squid-proxy-canada-$i
+done
+az container show --resource-group myProxyGroup --name mySquidProxy --query "\{IP:ipAddress.ip, Status:instanceView.state\}" --output table
