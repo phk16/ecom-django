@@ -1,0 +1,11 @@
+#create vpn using vm + openVPN
+
+az vm create \
+    --resource-group vpn-rg-EastUS \
+    --name vpn-server \
+    --image UbuntuLTS \
+    --size Standard_B1s \
+    --admin-username azureuser \
+    --generate-ssh-keys \
+    --public-ip-sku Standard \
+    --location EastUS
