@@ -1,0 +1,159 @@
+#setting up azure locally
+For MacOS:
+Install Homebrew (if not already installed): Open the terminal and run:
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Install Azure CLI using Homebrew: Run the following command:
+
+brew install azure-cli
+
+Verify installation: Once installed, verify it by running:
+
+az --version
+
+This should show the version of Azure CLI installed.
+
+For Windows:
+Download the installer: Go to the Azure CLI installer page and download the installer.
+Run the installer: Follow the prompts in the installer.
+Verify installation: Open Command Prompt or PowerShell and run:
+
+az --version
+
+For Linux:
+You can install it using the appropriate package manager for your distribution. Here's how you can install it on Ubuntu:
+
+Update the package list:
+
+sudo apt-get update
+
+Install the Azure CLI:
+
+sudo apt-get install azure-cli
+
+Verify the installation:
+
+az --version
+
+---------------------------------------------------------------------------------------
+After Installation:
+Once Azure CLI is installed, you should be able to run the command you attempted earlier. Also, don't forget to sign in to your Azure account with:
+
+az login
+
+-----------------------------------------------------------------------------------
+
+generating keys to login
+
+1) You can generate an SSH key pair with the following command:
+
+ssh-keygen -t rsa -b 2048 -f ~/.ssh/my_azure_key
+
+2) Ensure the public key is added to the VM:
+
+az vm user update --resource-group vpn-rg-eastus --name vpn-server --username azureuser --ssh-key-value ~/.ssh/my_azure_key.pub
+
+3) now use private key to connect to vm
+
+ssh -i ~/.ssh/my_azure_key azureuser@<use ip address>
+
+4) Create a directory for the Easy-RSA configuration:
+
+make-cadir ~/openvpn-ca
+cd ~/openvpn-ca
+
+5) 
+nano vars
+
+and add
+
+export KEY_COUNTRY="US"
+export KEY_PROVINCE="CA"
+export KEY_CITY="SanFrancisco"
+export KEY_ORG="MyVPN"
+export KEY_EMAIL="me@example.com"
+export KEY_OU="MyOrgUnit"
+export KEY_NAME="server"
+
+
+7) generate keys
+
+cd ~  # Go to the home directory
+wget -O EasyRSA.tar.gz https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
+tar -xvzf EasyRSA.tar.gz
+mv EasyRSA-3.0.8 EasyRSA
+cd EasyRSA
+
+8) 
+
+./easyrsa init-pki
+
+9)
+./easyrsa build-ca
+
+common name - MyVPN-CA
+
+10)
+./easyrsa gen-req server nopass
+
+
+11) 
+./easyrsa sign-req server server
+
+12)
+
+./easyrsa gen-dh
+
+DH parameters of size 2048 created at /home/azureuser/EasyRSA/pki/dh.pem
+
+13) 
+openvpn --genkey secret ~/EasyRSA/pki/ta.key
+
+
+
+Your new CA certificate file for publishing is at:
+/home/azureuser/EasyRSA/pki/ca.crt
+---------------------------------------------------------------------------
+Common Name (eg: your user, host, or server name) [server]:MyVPN-CA
+
+Keypair and certificate request completed. Your files are:
+req: /home/azureuser/EasyRSA/pki/reqs/server.req
+key: /home/azureuser/EasyRSA/pki/private/server.key
+------------------------------------------------------------------------------
+Request subject, to be signed as a server certificate for 825 days:
+
+subject=
+    commonName                = MyVPN-CA
+----------------------------------------------------------------------------
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'MyVPN-CA'
+Certificate is to be certified until May 10 15:25:45 2027 GMT (825 days)
+
+Write out database with 1 new entries
+Data Base Updated
+
+Certificate created at: /home/azureuser/EasyRSA/pki/issued/server.crt
+
+
+------------------------------------------------------------------------
+
+
+sudo scp azureuser@20.232.125.87:/home/azureuser/ca.crt ~/Downloads/AzureCustomVPN/
+sudo scp azureuser@20.232.125.87:/home/azureuser/server.key ~/Downloads/AzureCustomVPN/
+sudo scp azureuser@20.232.125.87:/home/azureuser/server.crt ~/Downloads/AzureCustomVPN/
+sudo scp azureuser@20.232.125.87:/home/azureuser/ta.key ~/Downloads/AzureCustomVPN/
+
+
+ssh azureuser@20.232.125.87
+
+scp azureuser@20.232.125.87:client1.ovpn /Users/praveenharikrishna/Downloads/AzureCustomVPN/file.ovpn
+scp azureuser@20.232.125.87:ca.crt /Users/praveenharikrishna/Downloads/AzureCustomVPN/
+
+sudo openvpn --config /Users/praveenharikrishna/Downloads/AzureCustomVPN/file.ovpn
+
+sudo /opt/homebrew/opt/openvpn/sbin/openvpn --config /Users/praveenharikrishna/Downloads/AzureCustomVPN/file.ovpn
+
+
+
+
