@@ -1,11 +1,71 @@
-#create vpn using vm + openVPN
+#create vpn using vm + wireshark
+
+az group create --name myResourceGroup --location eastus
 
 az vm create \
-    --resource-group vpn-rg-EastUS \
+  --resource-group myResourceGroup \
+  --name myWireGuardVM \
+  --image Ubuntu2404 \
+  --admin-username azureuser \
+  --generate-ssh-keys
+
+  "fqdns": "",
+  "id": "/subscriptions/dd35d98c-7e3c-4132-bc4b-8266cc530e58/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myWireGuardVM",
+  "location": "eastus",
+  "macAddress": "60-45-BD-EC-25-8F",
+  "powerState": "VM running",
+  "privateIpAddress": "10.0.0.4",
+  "publicIpAddress": "40.71.68.102",
+  "resourceGroup": "myResourceGroup",
+  "zones": ""
+
+ssh azureuser@40.71.68.102
+
+UALsa3tBxznTkpfrh1wkufSoipLF974mHo3UWIlcBEY=
+KFiA4gjGASGCLmh74mSvS34KvGVR3DCGNn+/fs67DTI=
+z2+oh0uMbZNyw92W9UAmzQrNrj3FAh0sLL5SWS8oQF0=
+
+
+
+
+
+
+
+
+#step-1:
+az group create --name vpn-rg-eastus --location eastus
+
+#step-2:
+az vm create \
+    --resource-group vpn-rg-eastus \
     --name vpn-server \
-    --image UbuntuLTS \
+    --image Ubuntu2204 \
     --size Standard_B1s \
     --admin-username azureuser \
     --generate-ssh-keys \
     --public-ip-sku Standard \
-    --location EastUS
+    --location eastus \
+    --storage-sku Standard_LRS
+
+result - 
+ "fqdns": "",
+  "id": "/subscriptions/dd35d98c-7e3c-4132-bc4b-8266cc530e58/resourceGroups/vpn-rg-eastus/providers/Microsoft.Compute/virtualMachines/vpn-server",
+  "location": "eastus",
+  "macAddress": "7C-1E-52-5C-A9-40",
+  "powerState": "VM running",
+  "privateIpAddress": "10.0.0.4",
+  "publicIpAddress": "20.232.125.87",
+  "resourceGroup": "vpn-rg-eastus",
+  "zones": ""
+
+step - 4: connect to vm
+
+ssh azureuser@20.232.125.87
+
+vpn VPN IP (on the VPN network): 10.8.0.1 
+
+step:5 install all softwares
+
+sudo apt update
+sudo apt upgrade -y
+sudo apt install openvpn easy-rsa -y
